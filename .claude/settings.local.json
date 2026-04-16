@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(cp \"c:\\\\Users\\\\Usuario\\\\Downloads\\\\TAREA_CAUSALIDAD_GRAFOS_FINANZAS\\\\docs\\\\claude\\\\contexto_tarea.md\" \"c:\\\\Users\\\\Usuario\\\\Downloads\\\\TAREA_CAUSALIDAD_GRAFOS_FINANZAS\\\\.claude\\\\dcs\\\\contexto_tarea.md\")",
+      "Bash(cp \"c:\\\\Users\\\\Usuario\\\\Downloads\\\\TAREA_CAUSALIDAD_GRAFOS_FINANZAS\\\\docs\\\\claude\\\\resumen_lopez_de_prado.md\" \"c:\\\\Users\\\\Usuario\\\\Downloads\\\\TAREA_CAUSALIDAD_GRAFOS_FINANZAS\\\\.claude\\\\dcs\\\\resumen_lopez_de_prado.md\")"
+    ]
+  }
+}
