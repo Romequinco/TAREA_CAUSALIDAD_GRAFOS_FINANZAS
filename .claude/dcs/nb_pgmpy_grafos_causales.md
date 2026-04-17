@@ -127,10 +127,45 @@ plt.show()
 |---------|-------|------|
 | Adult Income (procesado) | `pd.read_csv(url_github_pgmpy)` | Tabular categórico |
 | Bank Binary | `pd.read_excel("bank_binary.xlsx")` | Tabular mixto |
+| **Acciones (taller B3-T3)** | `yf.download(tickers, start, end)['Adj Close']` | Series temporales financieras |
+| **Factores Fama-French** | CSV descargado de Kenneth French / Dartmouth | Factores: Mkt-RF, SMB, HML, RMW, CMA |
 
 URL del Adult procesado:
 ```
 https://raw.githubusercontent.com/pgmpy/pgmpy/refs/heads/dev/pgmpy/tests/test_estimators/testdata/adult_proc.csv
+```
+
+### Flujo completo para datos financieros (demostrado en clase)
+
+```python
+import yfinance as yf
+import pandas as pd
+
+# Tickers usados por Valero en clase
+tickers = ['GE', 'KO', 'IBM', 'MCD', 'WMT', 'BRK-B', '^GSPC']
+data = yf.download(tickers, start='1980-01-01', end='2023-12-31')['Adj Close']
+
+# IMPORTANTE: trabajar siempre con retornos, no con precios
+returns = data.pct_change().dropna()
+
+# IMPORTANTE: limpiar nombres de columnas — pgmpy falla con guiones y símbolos
+returns.columns = [c.replace('-', '').replace('^', '') for c in returns.columns]
+
+# Filtrar por periodo temporal (ej. para comparar épocas)
+returns_old = returns['1980':'2000']
+returns_new = returns['2001':'2023']
+```
+
+### Variable con Lag (para forzar causalidad temporal)
+
+```python
+# Añadir variable desplazada un día hacia adelante
+df_with_lag = returns.copy()
+df_with_lag['GE_lag'] = df_with_lag['GE'].shift(-1)
+df_with_lag = df_with_lag.dropna()
+
+# Resultado esperado: la flecha GE → GE_lag debe salir siempre
+# (el valor de hoy predice el valor de mañana)
 ```
 
 ---
@@ -144,6 +179,9 @@ https://raw.githubusercontent.com/pgmpy/pgmpy/refs/heads/dev/pgmpy/tests/test_es
 | Velocidad | Más lento con muchas variables | Más rápido |
 | Parámetro clave | `ci_test`, `max_cond_vars` | `scoring_method` |
 | Uso prof. | Ambos, comparando resultados | sí |
+| **Opinión Valero** | Válido; más flechas bidireccionales | **Preferido para series temporales** — grafos con "más lógica" |
+
+> Valero dijo en clase: "el HC me da mejor pinta para datos financieros, tiene más lógica".
 
 ---
 

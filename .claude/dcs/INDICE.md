@@ -1,7 +1,7 @@
 # Índice de Contexto — .claude/dcs/
 
 Carpeta de contexto para Claude. Organizada por secciones.  
-Actualizado: 2026-04-16
+Actualizado: 2026-04-17
 
 ---
 
@@ -9,7 +9,8 @@ Actualizado: 2026-04-16
 
 | Archivo | Descripción |
 |---------|-------------|
-| [contexto_tarea.md](contexto_tarea.md) | Enunciado completo del Taller B3-T3. Entrega 22 Abril. Qué hay que entregar, criterios, estructura del notebook |
+| [contexto_tarea.md](contexto_tarea.md) | Enunciado completo del Taller B3-T3. Entrega **23 Abril**. Qué hay que entregar, criterios, estructura del notebook |
+| [contexto_taller_causalidad.md](contexto_taller_causalidad.md) | **Transcripción de Valero resolviendo el taller en vivo.** Flujo de código real, variaciones demostradas, bugs detectados, explicación del Factor Mirage, datos usados, filosofía de evaluación |
 
 ---
 
@@ -66,10 +67,11 @@ Actualizado: 2026-04-16
 ## Prioridad de consulta para la tarea B3-T3
 
 ```
-1. contexto_tarea.md          → qué hay que hacer exactamente
-2. resumen_lopez_de_prado.md  → bibliografía base, concepto Factor Mirage
-3. nb_pgmpy_grafos_causales.md → cómo codificarlo (estilo del profesor)
-4. 06_causalidad.md           → teoría de Granger y DAGs
-5. 04_dependencia_condicional.md → cómo quitar/añadir aristas
-6. 07_buenas_practicas.md     → errores a evitar
+1. contexto_taller_causalidad.md  → FUENTE PRIMARIA: Valero resolviendo el taller en vivo
+2. contexto_tarea.md              → enunciado formal y criterios de evaluación
+3. resumen_lopez_de_prado.md      → bibliografía base, concepto Factor Mirage
+4. nb_pgmpy_grafos_causales.md    → API pgmpy detallada + flujo financiero
+5. 06_causalidad.md               → teoría de Granger y DAGs
+6. 04_dependencia_condicional.md  → cómo quitar/añadir aristas
+7. 07_buenas_practicas.md         → errores a evitar
 ```

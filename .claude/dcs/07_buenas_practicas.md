@@ -52,6 +52,16 @@ HSIC no normalizado crece con el tamaño muestral. Siempre usar CKA (versión no
 
 ---
 
+## Bugs y errores detectados en vivo (clase Valero, 17 abril 2026)
+
+- **Sobreescribir el PNG**: si llamas varias veces a `model.to_graphviz().draw("model.png")` con el mismo nombre de archivo, el visualizador puede seguir mostrando el anterior. Usar nombres distintos: `"model_pc.png"`, `"model_hc.png"`, etc.
+- **Caracteres especiales en columnas**: pgmpy falla con guiones (`BRK-B`) y circunflejos (`^GSPC`). Siempre limpiar con `c.replace('-', '').replace('^', '')` antes de pasar a pgmpy.
+- **Trabajar con precios en vez de retornos**: la causalidad y correlación en finanzas se mide sobre retornos (`pct_change()`), nunca sobre precios en niveles (no estacionarios).
+- **Lag con NaN al final**: `df.shift(-1)` genera un NaN en la última fila. Aplicar `dropna()` antes de pasar a pgmpy.
+- **Robustez ante estocasticidad (técnica López de Prado)**: el algoritmo puede dar grafos distintos en cada ejecución. Solución: ejecutar N=50 veces y quedarse solo con las aristas que aparecen en ≥ 2/3 de las iteraciones (~35 de 50).
+
+---
+
 ## Pipeline típico para grafos causales en finanzas
 
 ```python

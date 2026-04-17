@@ -208,3 +208,7 @@ __marimo__/
 
 # Documentos locales
 docs/
+
+# Contexto y configuración local de Claude
+.claude/dcs/contexto_taller_causalidad.md
+

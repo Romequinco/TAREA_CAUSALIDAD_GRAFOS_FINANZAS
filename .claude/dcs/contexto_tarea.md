@@ -1,7 +1,7 @@
 # Contexto: Taller B3-T3 — Causalidad entre Variables Financieras con Grafos
 
 ## Metadatos
-- **Entrega:** 22 de Abril de 2026, 23:59 (aula virtual)
+- **Entrega:** 23 de Abril de 2026, 23:59 (aula virtual) ← cambiado por Valero en clase
 - **Formato entregable:** Un Notebook Jupyter/Colab + vídeo de 5 minutos
 - **Grupo:** 2 estudiantes
 
@@ -61,43 +61,46 @@ Opciones interesantes:
 
 ---
 
-## Librerías Python sugeridas
+## Librerías Python (confirmadas por Valero en clase)
 
 ```python
 # Descarga de datos
-yfinance, pandas_datareader
+yfinance             # datos financieros históricos (Yahoo Finance)
+pandas_datareader    # Fama-French y otros
 
-# Análisis causal
-causallearn          # PC, FCI, GES, LiNGAM
-castle (gcastle)     # NOTEARS, DAG-GNN
-tigramite            # causalidad temporal (PCMCI)
+# Análisis causal — LIBRERÍA PRINCIPAL DEL PROFESOR
+pgmpy                # PC + HillClimbSearch. La más estable/robusta según Valero
+# !pip install pgmpy
+# !apt install libgraphviz-dev && pip install pygraphviz  (para draw())
 
 # Visualización
 networkx, matplotlib
-pyvis                # grafos interactivos
-graphviz
+graphviz / pygraphviz  # para model.to_graphviz().draw(...)
 ```
+
+> **Nota:** Valero descartó explícitamente `causallearn`, `castle` y `tigramite` para este taller. La librería usada en clase es únicamente `pgmpy`.
 
 ---
 
-## Estructura sugerida del Notebook
+## Estructura del Notebook (validada por Valero en clase)
+
+Valero insistió en que sea **lo más mínimo posible** — si cabe en 10 líneas, mejor que en 100.
 
 ```
-1. Imports y configuración
-2. Descarga y limpieza de datos
-3. Análisis exploratorio (EDA) breve
+1. Instalación pgmpy (1 celda)
+2. Imports
+3. Carga de datos financieros + conversión a retornos + limpieza de nombres de columnas
 4. Matriz de correlaciones → heatmap
-5. Matriz direccional → cross-correlación con lag / test Granger
-6. DAG base (algoritmo PC o GES)
-7. Análisis comparativo:
-   7a. Diferentes periodos
-   7b. Con/sin lag
-   7c. Distintos algoritmos
-   7d. Distintos parámetros / semilla
-   7e. Distintas visualizaciones
-8. [EXTRA] Factor Mirage
-9. Conclusiones financieras
+5. Estimación del DAG (PC o HillClimbSearch)
+6. Matriz direccional (adyacencia) + visualización del grafo
+7. Variación 1: [elegir una — ej. dos periodos temporales]
+8. Variación 2: [elegir una — ej. cambiar algoritmo o significance_level]
+9. [EXTRA] Factor Mirage: demostrar que usar variables con flecha invertida
+         sube el R² artificialmente pero rompe el modelo en producción
 ```
+
+> No hace falta implementar todas las variaciones. Valero dijo explícitamente:
+> elegir 1 o 2 variaciones y explicarlas bien es mejor que hacer 6 mal.
 
 ---
 
