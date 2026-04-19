@@ -29,9 +29,12 @@ Descargamos datos de 5 activos financieros muy conocidos, desde el año 2000 has
 Antes de hacer nada, instalamos las librerías de Python que vamos a necesitar. Es como abrir la caja de herramientas antes de ponerse a trabajar.
 
 Las más importantes son:
-- **pgmpy**: la que sabe construir grafos causales
+- **pgmpy**: la que sabe construir grafos causales (algoritmos PC y HillClimbSearch)
 - **yfinance**: la que descarga los datos de bolsa directamente de Yahoo Finance
 - **networkx**: la que dibuja los grafos con flechas
+- **statsmodels**: la que hace los tests de Granger
+- **lingam**: la que implementa el algoritmo LiNGAM
+- **pyvis**: la que genera los grafos interactivos en HTML
 
 ---
 
@@ -125,6 +128,19 @@ Si los grafos pre y post-crisis son distintos, eso nos dice que la **estructura 
 
 ---
 
+## Paso 6b — ¿Es diferente el grafo en un mercado alcista vs uno bajista?
+
+Además de comparar antes y después de la crisis de 2008, ahora también comparamos dos tipos de ambiente de mercado:
+
+- **Bull market (mercado alcista):** elegimos 2013–2017, una época de tranquilidad y subidas continuas. El VIX era bajo, los inversores estaban confiados.
+- **Bear market (mercado bajista / crisis):** elegimos 2007–2009, el corazón de la crisis subprime. Pánico, caídas brutales, correlaciones disparadas.
+
+**¿Qué esperamos ver?** En el bear market, todos los activos tienden a moverse juntos al mismo tiempo (el "todo cae junto" del pánico). Eso suele producir grafos más densos con más conexiones. En el bull market, las relaciones causales son más selectivas y tranquilas.
+
+Si los grafos son distintos, confirmamos que **la estructura causal depende del régimen de mercado**, no solo del período histórico.
+
+---
+
 ## Paso 7 — Variación 2: Dos métodos para encontrar el grafo causal
 
 Aquí comparamos dos formas distintas de construir el DAG:
@@ -145,7 +161,88 @@ Es como escalar una montaña a ciegas: das el paso que más te sube, y cuando ya
 
 ---
 
-## Paso 8 — Extra: El "Factor Mirage" (el peligro oculto del colisionador)
+## Paso 8 — Causalidad de Granger: usar el pasado para predecir el futuro
+
+Hasta ahora, el algoritmo PC miraba todas las variables al mismo tiempo (sin importar cuál pasó primero). Ahora hacemos algo diferente: miramos si **el pasado de una variable ayuda a predecir el futuro de otra**.
+
+Esto se llama el **test de Granger** (por el economista Clive Granger, que ganó el Nobel por esto).
+
+**¿Cómo funciona?**
+Imagina que queremos saber si el VIX "Granger-causa" al SP500:
+1. Cogemos todos los valores pasados del SP500 y los usamos para predecir el SP500 de hoy
+2. Ahora añadimos también los valores pasados del VIX y repetimos la predicción
+3. Si la predicción mejora al añadir el VIX, decimos que **el VIX Granger-causa al SP500**
+
+Lo hacemos para todos los pares de variables y mostramos los resultados en un mapa de calor de p-values. Las celdas rojas (p < 0.05) indican precedencia temporal significativa.
+
+**Importante:** Granger nos habla de precedencia temporal (quién va antes), no de causalidad estructural como PC. Son herramientas complementarias.
+
+---
+
+## Paso 9 — PC con variables retardadas (lag-1)
+
+Damos un paso más: en lugar de solo hacer el test de Granger, construimos un dataframe que tiene **10 columnas**: las 5 originales más las mismas 5 pero retardadas un día (el valor de ayer).
+
+Luego aplicamos el algoritmo PC sobre esas 10 columnas. Ahora cuando PC dibuja una flecha de `VIX_lag1` hacia `SP500`, está diciendo: "el VIX de ayer causalmente precede al SP500 de hoy". Esto es mucho más potente que la causalidad estática, porque respeta **la dirección del tiempo**.
+
+---
+
+## Paso 10 — LiNGAM: un algoritmo completamente diferente
+
+Hasta ahora hemos usado PC (que borra conexiones estadísticamente independientes) y HillClimbSearch (que maximiza una puntuación BIC). Ahora añadimos un tercer algoritmo: **LiNGAM**.
+
+**¿Qué lo hace especial?**
+
+PC a veces no puede decidir la dirección de una flecha y la deja sin orientar. LiNGAM siempre orienta todas las flechas completamente. ¿Cómo lo hace? Aprovecha una característica de los retornos financieros: **no son gaussianos**. Tienen "colas gordas" (los días extremos son más frecuentes que lo que predeciría una distribución normal).
+
+LiNGAM usa una técnica llamada **ICA** (Análisis de Componentes Independientes) que detecta esas no-gaussianidades y las usa para determinar la dirección de cada flecha.
+
+Si PC y LiNGAM coinciden en la mayoría de las aristas, tenemos mucha confianza en el resultado. Si difieren mucho, los datos son ambiguos.
+
+---
+
+## Paso 11 — ¿Cuánto importa el valor de alpha que elegimos?
+
+El algoritmo PC tiene un parámetro clave: `significance_level` (también llamado alpha). Este número controla qué tan exigente es PC para eliminar una conexión:
+
+- **Alpha bajo (0.01):** muy exigente, solo mantiene las conexiones más fuertes → grafo escaso
+- **Alpha alto (0.20):** poco exigente, mantiene muchas conexiones → grafo denso
+
+Probamos con 4 valores: 0.01, 0.05, 0.10 y 0.20, y contamos cuántas aristas tiene el grafo resultante en cada caso.
+
+**¿Por qué importa esto?** Si las conclusiones principales cambian radicalmente al mover el alpha, eso nos dice que el resultado es frágil y no deberíamos fiarnos mucho. Si el grafo es estable ante cambios de alpha, tenemos más confianza. Es una forma de hacer un **análisis de sensibilidad** al parámetro.
+
+---
+
+## Paso 12 — ¿Las flechas del grafo son fiables o aparecen por casualidad?
+
+Aquí hacemos algo llamado **bootstrap**. La idea es simple:
+
+1. Cogemos nuestros 5.000 días de retornos y sacamos una muestra aleatoria del mismo tamaño **con reemplazo** (algunos días se repiten, otros no aparecen)
+2. Aplicamos PC a esa muestra y guardamos qué flechas aparecen
+3. Repetimos 20 veces
+
+Al final, para cada flecha posible (por ejemplo, VIX → SP500) sabemos cuántas veces apareció en las 20 muestras. Si aparece en 19 de 20, es muy robusta. Si solo aparece en 4 de 20, es poco fiable y puede ser un artefacto de los datos.
+
+Mostramos esto en un mapa de calor donde el 1.0 significa "siempre aparece" y el 0.0 significa "nunca aparece".
+
+Usamos `np.random.seed(42)` para fijar la semilla del generador de números aleatorios, lo que garantiza que los resultados son **reproducibles**: cualquier persona que ejecute el código obtendrá exactamente los mismos 20 muestras.
+
+---
+
+## Paso 13 — Ver el grafo en el navegador (pyvis interactivo)
+
+Todos los grafos anteriores son imágenes estáticas. Aquí generamos un archivo HTML que se puede abrir en **cualquier navegador** (Chrome, Firefox...) y que permite:
+
+- **Arrastrar los nodos** con el ratón
+- **Hacer zoom** con la rueda del ratón
+- **Ver el grafo desde distintos ángulos** reorganizando los nodos
+
+Esto es útil para explorar grafos más complejos donde los nodos se solapan en la imagen estática. No necesita Python instalado: basta con abrir el archivo `dag_pc_interactivo.html`.
+
+---
+
+## Paso 14 — Extra: El "Factor Mirage" (el peligro oculto del colisionador)
 
 Esta es la parte más conceptualmente interesante del trabajo.
 
@@ -184,11 +281,15 @@ En finanzas, los analistas suelen añadir muchas variables de control "por si ac
 | Lo que empezamos haciendo | Lo que conseguimos al final |
 |---|---|
 | Correlaciones simétricas (no sabemos quién causa qué) | Grafos con flechas (sabemos las direcciones) |
-| Un único análisis con todos los datos | Comparación pre-crisis vs post-crisis |
-| Un único método | Dos métodos comparados (PC y HillClimbSearch) |
+| Un único análisis con todos los datos | Comparación pre/post-crisis **y** bull vs bear market |
+| Un único método (PC) | Cuatro métodos: PC, HillClimbSearch, Granger y LiNGAM |
 | Regresiones sin pensar en la estructura causal | Identificación del "Factor Mirage" por colisionadores |
+| Sin retardos temporales | Granger p-values + PC sobre variables con lag-1 |
+| Un solo valor de alpha fijo | Análisis de sensibilidad al alpha [0.01 → 0.20] |
+| Sin verificar robustez | Bootstrap de 20 muestras con semilla fija (reproducible) |
+| Solo gráficos estáticos | Visualización interactiva en HTML con pyvis |
 
-**La conclusión principal:** la correlación nos dice que las cosas se mueven juntas, pero no es suficiente para tomar decisiones causales. Los grafos causales (DAGs) nos dan la dirección de las influencias, nos permiten ver si esas influencias cambian con el tiempo, y nos protegen de errores estadísticos como el sesgo de colisionador.
+**La conclusión principal:** la correlación nos dice que las cosas se mueven juntas, pero no es suficiente para tomar decisiones causales. Los grafos causales (DAGs) nos dan la dirección de las influencias, nos permiten ver si esas influencias cambian con el tiempo y el régimen de mercado, y nos protegen de errores estadísticos. Además, comparar varios algoritmos, variar los parámetros y hacer bootstrap nos da confianza en qué partes del grafo son robustas y cuáles son frágiles.
 
 ---
 
