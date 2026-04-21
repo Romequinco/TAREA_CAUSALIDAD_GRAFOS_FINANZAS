@@ -1,11 +1,11 @@
 # Causalidad entre Variables Financieras con Grafos
 
-Taller B3-T3 — Descubrimiento de estructura causal sobre variables macro financieras usando DAGs.
+Taller B3-T3 — Descubrimiento de estructura causal sobre sectores bursátiles de EE.UU. usando DAGs.
 
 ## Objetivo
 
 Demostrar la diferencia entre correlacion (asociacion simetrica) y causalidad (relacion dirigida)
-aplicada a variables macro, usando Grafos Acíclicos Dirigidos (DAG) aprendidos de datos historicos.
+aplicada a sectores bursatiles, usando Grafos Acíclicos Dirigidos (DAG) aprendidos de datos historicos.
 
 ## Entregables
 
@@ -15,15 +15,16 @@ aplicada a variables macro, usando Grafos Acíclicos Dirigidos (DAG) aprendidos 
 
 ## Dataset
 
-Variables macro diarias descargadas via `yfinance` (2000-2024):
+ETFs sectoriales de EE.UU. descargados via `yfinance` (2000-2024):
 
 | Ticker | Nombre | Descripcion |
 |---|---|---|
-| ^GSPC | SP500 | Indice S&P 500 |
-| ^VIX | VIX | Indice de volatilidad implícita |
-| GLD | GLD | ETF de oro |
-| TLT | TLT | ETF de bonos del Tesoro largo plazo |
-| DX-Y.NYB | DXY | Indice del dolar americano |
+| XLF | Financiero | ETF sector financiero (bancos, aseguradoras) |
+| XLE | Energia | ETF sector energético (petroleras, gasistas) |
+| XLK | Tecnologia | ETF sector tecnológico (software, hardware, semis) |
+| XLV | Salud | ETF sector salud (farma, hospitales, medtech) |
+| XLI | Industrial | ETF sector industrial (manufactura, transporte, defensa) |
+| XLY | Consumo | ETF consumo discrecional (retail, ocio, autos) |
 
 ## Estructura del Notebook
 
